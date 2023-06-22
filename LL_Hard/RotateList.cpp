@@ -12,6 +12,7 @@ int lengt(ListNode* temp){
         ListNode* temp=head;
         int l=lengt(temp);
         k = k%l;
+        
         int pos=l-k;
         int cnt=0;
         while(temp->next!=NULL){
