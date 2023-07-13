@@ -1,65 +1,84 @@
+#include <bits/stdc++.h> 
 class node{
-    node* child[2];
+    node* child[26];
+    int prefcnt=0;
+    int endwith=0;
     public:
     node(){
-        child[0]=NULL;
-        child[1]=NULL;
+        for(int i=0;i<26;i++) child[i]=NULL;
     }
-    bool checkbit(int bit){
-        return (child[bit]!=NULL);
+    bool charexist(char ch){
+        return child[ch-'a']!=NULL;
     }
-    void putbit(int bit,node* root){
-        child[bit]=root;
+    node* getchar(char ch){
+        return child[ch-'a'];
+    }  
+    void put(char ch,node* nd){
+        child[ch-'a']=nd;
     }
-    node* getbit(int bit){
-        return child[bit];
+    void incpref(){
+        prefcnt++;
+    }
+    void decpref(){
+        prefcnt--;
+    }
+    void incendwith(){
+        endwith++;
+    }
+    void decendwith(){
+        endwith--;
+    }
+    int getend(){
+        return endwith;
+    }
+    int getprefcnt(){
+        return prefcnt;
     }
 };
+
 class Trie{
     node* root;
     public:
     Trie(){
         root = new node();
     }
-    void insert(int num){
-        auto it = root;
-        for(int i=31;i>=0;i--){
-            int bit = (1<<i) & num;
-            if(bit>0) bit=1;
-            if(it->checkbit(bit)){
-                it = it->getbit(bit);
+    void insert(string word){
+        auto nod = root;
+        for(auto ch:word){
+            if(nod->charexist(ch)){
+                nod = nod->getchar(ch);
+                nod->incpref();
             }
             else{
-                it->putbit(bit,new node());
-                it = it->getbit(bit);
+                nod->put(ch,new node());
+                nod = nod->getchar(ch);
+                nod->incpref();
             }
         }
+        nod->incendwith();
     }
-    int maxXor(int num){
-        int maxSum=0;
-        auto it=root;
-        for(int i=31;i>=0;i--){
-            int bit = (1<<i) & num;
-            if(bit>0) bit=1;
-            if(it->checkbit(!bit)){
-                maxSum |= (1<<i);
-                it = it->getbit(!bit);
-            }
-            else it = it->getbit(bit);
+    bool checkword(string word){
+        auto it = root;
+        for(auto ch:word){
+            it = it->getchar(ch);
+            if(it->getend()==0) return false; 
         }
-        return maxSum;
+        return true;
     }
 };
-
-class Solution {
-public:
-    int findMaximumXOR(vector<int>& nums) {
-        Trie* trie = new Trie();
-        int ans=0;
-        for(int i=0;i<nums.size();i++){
-            trie->insert(nums[i]);
-            ans = max(ans,trie->maxXor(nums[i]));
-        }
-        return ans;
+string completeString(int n, vector<string> &a){
+    // Write your code here.
+    Trie* trie = new Trie();
+    for(auto word:a){
+        trie->insert(word);
     }
-};
+    string ans="";
+    for(auto word:a){
+        if(trie->checkword(word)){
+            if(word.size()>ans.size()) ans=word;
+            else if(word.size()==ans.size()) ans = min(ans,word);
+        }
+    }
+    if(ans=="") return "None";
+    return ans;
+}
